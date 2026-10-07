@@ -12,11 +12,11 @@ function noSearchDefaultPageRender() {
           <input 
             type="text" 
             class="url-input"
-            value="https://unduck.link?q=%s"
+            value="${window.location.origin}${import.meta.env.BASE_URL}?q=%s"
             readonly 
           />
           <button class="copy-button">
-            <img src="/clipboard.svg" alt="Copy" />
+            <img src="${import.meta.env.BASE_URL}clipboard.svg" alt="Copy" />
           </button>
         </div>
       </div>
@@ -36,10 +36,10 @@ function noSearchDefaultPageRender() {
 
   copyButton.addEventListener("click", async () => {
     await navigator.clipboard.writeText(urlInput.value);
-    copyIcon.src = "/clipboard-check.svg";
+    copyIcon.src = `${import.meta.env.BASE_URL}clipboard-check.svg`;
 
     setTimeout(() => {
-      copyIcon.src = "/clipboard.svg";
+      copyIcon.src = `${import.meta.env.BASE_URL}clipboard.svg`;
     }, 2000);
   });
 }
