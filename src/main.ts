@@ -1,4 +1,4 @@
-import { bangs } from "./bang";
+import { customBangs } from "./custom-bangs";
 import "./global.css";
 
 function noSearchDefaultPageRender() {
@@ -45,9 +45,18 @@ function noSearchDefaultPageRender() {
 }
 
 const LS_DEFAULT_BANG = localStorage.getItem("default-bang") ?? "g";
-const defaultBang = bangs.find((b) => b.t === LS_DEFAULT_BANG);
 
-function getBangredirectUrl() {
+type Bang = { t: string; d: string; u: string };
+
+async function findBang(trigger: string): Promise<Bang | undefined> {
+  const custom = customBangs.find((b) => b.t === trigger);
+  if (custom) return custom;
+  // Only load the full bang list when a custom bang doesn't match
+  const { bangs } = await import("./bang");
+  return bangs.find((b) => b.t === trigger);
+}
+
+async function getBangredirectUrl() {
   const url = new URL(window.location.href);
   const query = url.searchParams.get("q")?.trim() ?? "";
   if (!query) {
@@ -58,7 +67,9 @@ function getBangredirectUrl() {
   const match = query.match(/!(\S+)/i);
 
   const bangCandidate = match?.[1]?.toLowerCase();
-  const selectedBang = bangs.find((b) => b.t === bangCandidate) ?? defaultBang;
+  const selectedBang =
+    (bangCandidate && (await findBang(bangCandidate))) ||
+    (await findBang(LS_DEFAULT_BANG));
 
   // Remove the first bang from the query
   const cleanQuery = query.replace(/!\S+\s*/i, "").trim();
@@ -79,8 +90,8 @@ function getBangredirectUrl() {
   return searchUrl;
 }
 
-function doRedirect() {
-  const searchUrl = getBangredirectUrl();
+async function doRedirect() {
+  const searchUrl = await getBangredirectUrl();
   if (!searchUrl) return;
   window.location.replace(searchUrl);
 }
