@@ -58,11 +58,14 @@ async function findBang(trigger: string): Promise<Bang | undefined> {
 
 async function getBangredirectUrl() {
   const url = new URL(window.location.href);
-  const query = url.searchParams.get("q")?.trim() ?? "";
+  let query = url.searchParams.get("q")?.trim() ?? "";
   if (!query) {
     noSearchDefaultPageRender();
     return null;
   }
+
+  // A bare number (e.g. `123`) is treated as a pimq pull request: `!pr 123`
+  if (/^\d+$/.test(query)) query = `!pr ${query}`;
 
   const match = query.match(/!(\S+)/i);
 
