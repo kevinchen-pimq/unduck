@@ -93,9 +93,25 @@ async function getBangredirectUrl() {
   return searchUrl;
 }
 
+// Show where we're going while the (possibly slow) target page loads
+function redirectingPageRender(target: string) {
+  const app = document.querySelector<HTMLDivElement>("#app")!;
+  app.innerHTML = `
+    <div class="redirect-container">
+      <p class="redirect-label">Redirecting to</p>
+      <a class="redirect-url"></a>
+    </div>
+  `;
+  const link = app.querySelector<HTMLAnchorElement>(".redirect-url")!;
+  link.href = target;
+  link.textContent = target;
+  document.title = `→ ${target}`;
+}
+
 async function doRedirect() {
   const searchUrl = await getBangredirectUrl();
   if (!searchUrl) return;
+  redirectingPageRender(searchUrl);
   window.location.replace(searchUrl);
 }
 
